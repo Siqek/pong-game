@@ -28,33 +28,24 @@ int main ()
     static constexpr float c_PaddleMarginFromWall = 40.f;
     static constexpr float c_PaddleSpeed = 400.f;
 
-    Rectangle playerPaddle{
+    Vector2 playerPaddle{
         .x = c_WindowWidth - c_PaddleMarginFromWall - c_PaddleWidth,
         .y = c_WindowHeight / 2.f - c_PaddleHeight / 2.f,
-        .width = c_PaddleWidth,
-        .height = c_PaddleHeight
     };
-    Rectangle enemyPaddle{
+    Vector2 enemyPaddle{
         .x = c_PaddleMarginFromWall,
         .y = c_WindowHeight / 2.f - c_PaddleHeight / 2.f,
-        .width = c_PaddleWidth,
-        .height = c_PaddleHeight
     };
 
     /*
     * ----- Init ball -----
     */
-    struct Circle {
-        Vector2 center{ .x = 0.f, .y = 0.f }; // position of center
-        float radius = 0.f;
-    };
-
     static constexpr float c_BallRadius = 10.f;
     static constexpr float c_BallSpeed = 200.f;
 
-    Circle ball{
-        .center{ .x = c_WindowWidth / 2.f, .y = c_WindowHeight / 2.f },
-        .radius = c_BallRadius
+    Vector2 ballCenter{
+        .x = c_WindowWidth / 2.f,
+        .y = c_WindowHeight / 2.f
     };
     Vector2 ballDirection{ .x = 1.f, .y = 0.f };
 
@@ -81,34 +72,46 @@ int main ()
         }
 
         playerPaddle.y = Clamp(playerPaddle.y, 0.f, c_WindowHeight - c_PaddleHeight);
+        enemyPaddle.y = Clamp(ballCenter.y - c_PaddleHeight / 2.f, 0.f, c_WindowHeight - c_PaddleHeight);
 
         Vector2 ballDest{
-            .x = ball.center.x + ballDirection.x * dt * c_BallSpeed,
-            .y = ball.center.y + ballDirection.y * dt * c_BallSpeed
+            .x = ballCenter.x + ballDirection.x * dt * c_BallSpeed,
+            .y = ballCenter.y + ballDirection.y * dt * c_BallSpeed
         };
 
-        // TODO(siqek): determine which paddle check
 
-        // Check if the ball crosses the paddle's face.
-        const bool isCrossingPaddleFace = playerPaddle.x > ball.center.x && playerPaddle.x < ballDest.x;
+        /*
+        * ----- Paddle collision with ball -----
+        */
+        const bool isBallHeadingRight = ballDirection.x > 0.f;
+        const Vector2& paddle = isBallHeadingRight ? playerPaddle : enemyPaddle;
+
+        const float paddleCollisionBound = (isBallHeadingRight
+            ? playerPaddle.x - c_BallRadius
+            : enemyPaddle.x + c_PaddleWidth + c_BallRadius);
+
+        // Check if the ball crosses the paddle's collision bound.
+        const bool isCrossingPaddleFace = (isBallHeadingRight
+            ? ballDest.x > paddleCollisionBound
+            : ballDest.x < paddleCollisionBound);
         if (isCrossingPaddleFace)
         {
-            // Calculate the ball's Y coordinate at the paddle's face.
-            const float a = (ball.center.y - ballDest.y) / (ball.center.x - ballDest.x);
-            const float x = playerPaddle.x;
-            const float x0 = ball.center.x;
-            const float y0 = ball.center.y;
+            // Calculate the ball's Y coordinate at the paddle's collision bound.
+            const float a = (ballCenter.y - ballDest.y) / (ballCenter.x - ballDest.x);
+            const float x = paddleCollisionBound;
+            const float x0 = ballCenter.x;
+            const float y0 = ballCenter.y;
             const float y = a * (x - x0) + y0;
 
-            // Check if the ball intersects the paddle, including its radius.
-            const bool isHittingPaddle = y >= playerPaddle.y - ball.radius && y <= playerPaddle.y + playerPaddle.height + ball.radius;
+            // Check if the ball intersects the paddle.
+            const bool isHittingPaddle = y >= paddle.y - c_BallRadius && y <= paddle.y + c_PaddleHeight + c_BallRadius;
             if (isHittingPaddle)
             {
                 // Reflect the ball's horizontal direction.
                 ballDirection.x *= -1;
 
                 // Reflect the destination across the paddle's face.
-                ballDest.x = 2.f * playerPaddle.x - ballDest.x;
+                ballDest.x = 2.f * paddleCollisionBound - ballDest.x;
                 ballDest.y = y;
             }
         }
@@ -121,7 +124,7 @@ int main ()
         // TODO(siqek): respawn ball after it hits vertical wall
 
         // Finally move the ball after collision checks.
-        ball.center = ballDest;
+        ballCenter = ballDest;
 
         /*
         * ----- Render -----
@@ -134,10 +137,10 @@ int main ()
             static constexpr Vector2 c_DashedLineEnd{ .x = c_WindowWidth / 2.f, .y = c_WindowHeight };
             DrawLineDashed(c_DashedLineStart, c_DashedLineEnd, 10.f, 10.f, RAYWHITE);
 
-            DrawCircleV(ball.center, ball.radius, RAYWHITE);
+            DrawCircleV(ballCenter, c_BallRadius, RAYWHITE);
 
-            DrawRectangleRec(playerPaddle, RAYWHITE);
-            DrawRectangleRec(enemyPaddle, RAYWHITE);
+            DrawRectangle(playerPaddle.x, playerPaddle.y, c_PaddleWidth, c_PaddleHeight, RAYWHITE);
+            DrawRectangle(enemyPaddle.x, enemyPaddle.y, c_PaddleWidth, c_PaddleHeight, RAYWHITE);
 
         EndDrawing();
     }
