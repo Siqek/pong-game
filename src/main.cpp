@@ -41,7 +41,7 @@ int main ()
     * ----- Init ball -----
     */
     static constexpr float c_BallRadius = 10.f;
-    static constexpr float c_BallSpeed = 200.f;
+    static constexpr float c_BallSpeed = 500.f;
 
     Vector2 ballCenter{
         .x = c_WindowWidth / 2.f,
@@ -92,8 +92,8 @@ int main ()
 
         // Check if the ball crosses the paddle's collision bound.
         const bool isCrossingPaddleFace = (isBallHeadingRight
-            ? ballDest.x > paddleCollisionBound
-            : ballDest.x < paddleCollisionBound);
+            ? ballDest.x > paddleCollisionBound && ballCenter.x < paddleCollisionBound
+            : ballDest.x < paddleCollisionBound && ballCenter.x > paddleCollisionBound);
         if (isCrossingPaddleFace)
         {
             // Calculate the ball's Y coordinate at the paddle's collision bound.
