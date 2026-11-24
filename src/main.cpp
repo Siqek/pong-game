@@ -117,6 +117,24 @@ int main ()
         }
 
         // TODO(siqek): handle ball collision with horizontal walls
+        const bool isBallMovingUp = ballDirection.y < 0.f;
+        if (isBallMovingUp)
+        {
+            if (ballDest.y <= c_BallRadius)
+            {
+                ballDirection.y *= -1;
+                ballDest.y = ballDest.y + 2.f * (c_BallRadius - ballDest.y);
+            }
+        }
+        else
+        {
+            if (ballDest.y >= c_WindowHeight - c_BallRadius)
+            {
+                ballDirection.y *= -1;
+                ballDest.y = 2.f * (c_WindowHeight - c_BallRadius) - ballDest.y;
+            }
+        }
+
         // TODO(siqek): disallow ball to bounce from the wall into inside of a paddle
 
         // TODO(siqek): handle ball collision with vertical walls
