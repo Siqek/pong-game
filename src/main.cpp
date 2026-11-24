@@ -112,7 +112,6 @@ int main ()
 
                 // Reflect the destination across the paddle's face.
                 ballDest.x = 2.f * paddleCollisionBound - ballDest.x;
-                ballDest.y = y;
             }
         }
 
