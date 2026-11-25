@@ -83,39 +83,46 @@ int main ()
         /*
         * ----- Paddle collision with ball -----
         */
-        const bool isBallHeadingRight = ballDirection.x > 0.f;
-        const Vector2& paddle = isBallHeadingRight ? playerPaddle : enemyPaddle;
-
-        const float paddleCollisionBound = (isBallHeadingRight
-            ? playerPaddle.x - c_BallRadius
-            : enemyPaddle.x + c_PaddleWidth + c_BallRadius);
-
-        // Check if the ball crosses the paddle's collision bound.
-        const bool isCrossingPaddleFace = (isBallHeadingRight
-            ? ballDest.x > paddleCollisionBound && ballCenter.x < paddleCollisionBound
-            : ballDest.x < paddleCollisionBound && ballCenter.x > paddleCollisionBound);
-        if (isCrossingPaddleFace)
+        const auto resolvePaddleBallCollision = [&]() -> void
         {
-            // Calculate the ball's Y coordinate at the paddle's collision bound.
-            const float a = (ballCenter.y - ballDest.y) / (ballCenter.x - ballDest.x);
-            const float x = paddleCollisionBound;
-            const float x0 = ballCenter.x;
-            const float y0 = ballCenter.y;
-            const float y = a * (x - x0) + y0;
+            const bool isBallHeadingRight = ballDirection.x > 0.f;
+            const Vector2& paddle = isBallHeadingRight ? playerPaddle : enemyPaddle;
 
-            // Check if the ball intersects the paddle.
-            const bool isHittingPaddle = y >= paddle.y - c_BallRadius && y <= paddle.y + c_PaddleHeight + c_BallRadius;
-            if (isHittingPaddle)
+            const float paddleCollisionBound = (isBallHeadingRight
+                ? playerPaddle.x - c_BallRadius
+                : enemyPaddle.x + c_PaddleWidth + c_BallRadius);
+
+            // Check if the ball crosses the paddle's collision bound.
+            const bool isCrossingPaddleFace = (isBallHeadingRight
+                ? ballDest.x > paddleCollisionBound && ballCenter.x < paddleCollisionBound
+                : ballDest.x < paddleCollisionBound && ballCenter.x > paddleCollisionBound);
+            if (isCrossingPaddleFace)
             {
-                // Reflect the ball's horizontal direction.
-                ballDirection.x *= -1;
+                // Calculate the ball's Y coordinate at the paddle's collision bound.
+                const float a = (ballCenter.y - ballDest.y) / (ballCenter.x - ballDest.x);
+                const float x = paddleCollisionBound;
+                const float x0 = ballCenter.x;
+                const float y0 = ballCenter.y;
+                const float y = a * (x - x0) + y0;
 
-                // Reflect the destination across the paddle's face.
-                ballDest.x = 2.f * paddleCollisionBound - ballDest.x;
+                // Check if the ball intersects the paddle.
+                const bool isHittingPaddle = y >= paddle.y - c_BallRadius && y <= paddle.y + c_PaddleHeight + c_BallRadius;
+                if (isHittingPaddle)
+                {
+                    // Reflect the ball's horizontal direction.
+                    ballDirection.x *= -1;
+
+                    // Reflect the destination across the paddle's face.
+                    ballDest.x = 2.f * paddleCollisionBound - ballDest.x;
+                }
             }
-        }
+        };
+        resolvePaddleBallCollision();
 
-        // TODO(siqek): handle ball collision with horizontal walls
+
+        /*
+        * ----- Ball collision with horizontal walls -----
+        */
         const bool isBallMovingUp = ballDirection.y < 0.f;
         if (isBallMovingUp)
         {
@@ -134,7 +141,10 @@ int main ()
             }
         }
 
-        // TODO(siqek): disallow ball to bounce from the wall into inside of a paddle
+        /*
+        * ----- Paddle second collision check with ball preventing the ball from entering the paddle after wall bounce -----
+        */
+        resolvePaddleBallCollision();
 
         // TODO(siqek): handle ball collision with vertical walls
         // TODO(siqek): count points
