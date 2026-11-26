@@ -15,19 +15,19 @@ int main ()
     */
     SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
 
-    static constexpr const char* c_WindowTitle = "Pong Game";
-    static constexpr int c_WindowWidth = 1280;
-    static constexpr int c_WindowHeight = 720;
+    constexpr const char* c_WindowTitle = "Pong Game";
+    constexpr int c_WindowWidth = 1280;
+    constexpr int c_WindowHeight = 720;
 
     InitWindow(c_WindowWidth, c_WindowHeight, c_WindowTitle);
 
     /*
     * ----- Init paddles -----
     */
-    static constexpr float c_PaddleWidth = 16.f;
-    static constexpr float c_PaddleHeight = 120.f;
-    static constexpr float c_PaddleMarginFromWall = 40.f;
-    static constexpr float c_PaddleSpeed = 250.f;
+    constexpr float c_PaddleWidth = 16.f;
+    constexpr float c_PaddleHeight = 120.f;
+    constexpr float c_PaddleMarginFromWall = 40.f;
+    constexpr float c_PaddleSpeed = 250.f;
 
     Vector2 playerPaddle{
         .x = c_WindowWidth - c_PaddleMarginFromWall - c_PaddleWidth,
@@ -41,8 +41,8 @@ int main ()
     /*
     * ----- Init ball -----
     */
-    static constexpr float c_BallRadius = 10.f;
-    static constexpr float c_BallSpeed = 500.f;
+    constexpr float c_BallRadius = 10.f;
+    constexpr float c_BallSpeed = 500.f;
 
     Vector2 ballCenter{
         .x = c_WindowWidth / 2.f,
@@ -50,7 +50,7 @@ int main ()
     };
     Vector2 ballDirection{ .x = 1.f, .y = 0.f };
 
-    static constexpr int c_MaxInitialAngleDeg = 15;
+    constexpr int c_MaxInitialAngleDeg = 15;
     // Get random angle value from -15 deg up to +30 deg for ball direction.
     const float angleDeg = (-c_MaxInitialAngleDeg + std::rand() % (c_MaxInitialAngleDeg * 2 + 1));
     const float angleRad = angleDeg * DEG2RAD;
@@ -209,8 +209,8 @@ int main ()
             ClearBackground(BLACK);
 
             // Draw dashed line across the window middle
-            static constexpr Vector2 c_DashedLineStart{ .x = c_WindowWidth / 2.f, .y = 0.f };
-            static constexpr Vector2 c_DashedLineEnd{ .x = c_WindowWidth / 2.f, .y = c_WindowHeight };
+            constexpr Vector2 c_DashedLineStart{ .x = c_WindowWidth / 2.f, .y = 0.f };
+            constexpr Vector2 c_DashedLineEnd{ .x = c_WindowWidth / 2.f, .y = c_WindowHeight };
             DrawLineDashed(c_DashedLineStart, c_DashedLineEnd, 10.f, 10.f, RAYWHITE);
 
             // Draw ball.
@@ -221,8 +221,8 @@ int main ()
             DrawRectangle(enemyPaddle.x, enemyPaddle.y, c_PaddleWidth, c_PaddleHeight, RAYWHITE);
 
             // Draw score texts.
-            static constexpr int c_TextPosY = c_WindowHeight / 10;
-            static constexpr int c_FontSize = 32;
+            constexpr int c_TextPosY = c_WindowHeight / 10;
+            constexpr int c_FontSize = 32;
             DrawText(enemyScoreText.c_str(), c_WindowWidth / 4 * 1, c_TextPosY, c_FontSize, RAYWHITE);
             DrawText(playerScoreText.c_str(), c_WindowWidth / 4 * 3, c_TextPosY, c_FontSize, RAYWHITE);
 
